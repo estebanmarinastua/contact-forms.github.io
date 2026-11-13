@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulario de Contacto</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --error: #dc2626;
+    --success: #16a34a;
+    --border: #d1d5db;
+    --text: #1f2937;
+    --bg: #f3f4f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--text);
+  }
+  .contact-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    max-width: 520px;
+    width: 100%;
+    padding: 36px;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 6px; }
+  .subtitle { color: #6b7280; font-size: .95rem; margin-bottom: 24px; }
+  .field { margin-bottom: 18px; }
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: 6px;
+  }
+  label .req { color: var(--error); }
+  input, textarea, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color .2s, box-shadow .2s;
+    background: #fff;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+  }
+  textarea { resize: vertical; min-height: 120px; }
+  .error-msg {
+    color: var(--error);
+    font-size: .82rem;
+    margin-top: 5px;
+    display: none;
+  }
+  .field.invalid input, .field.invalid textarea, .field.invalid select {
+    border-color: var(--error);
+  }
+  .field.invalid .error-msg { display: block; }
+  button {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  button:hover { background: var(--primary-dark); }
+  button:disabled { background: #9ca3af; cursor: not-allowed; }
+  .alert {
+    display: none;
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: .95rem;
+  }
+  .alert.success { background: #dcfce7; color: var(--success); display: block; }
+  .char-count { font-size: .78rem; color: #9ca3af; text-align: right; margin-top: 4px; }
+  @media (max-width: 480px) { .contact-card { padding: 24px; } }
+</style>
+</head>
+<body>
+  <div class="contact-card">
+    <h1>Contáctanos</h1>
+    <p class="subtitle">Completa el formulario y te responderemos en menos de 24 horas.</p>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="contactForm" novalidate>
+      <div class="field" id="f-name">
+        <label for="name">Nombre completo <span class="req">*</span></label>
+        <input type="text" id="name" name="name" placeholder="Tu nombre" autocomplete="name">
+        <p class="error-msg">Por favor, ingresa tu nombre (mínimo 2 caracteres).</p>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="email">Correo electrónico <span class="req">*</span></label>
+        <input type="email" id="email" name="email" placeholder="tu@correo.com" autocomplete="email">
+        <p class="error-msg">Por favor, ingresa un correo electrónico válido.</p>
+      </div>
+
+      <div class="field" id="f-phone">
+        <label for="phone">Teléfono (opcional)</label>
+        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" autocomplete="tel">
+        <p class="error-msg">Ingresa un número de teléfono válido.</p>
+      </div>
+
+      <div class="field" id="f-subject">
+        <label for="subject">Asunto <span class="req">*</span></label>
+        <select id="subject" name="subject">
+          <option value="">Selecciona un asunto…</option>
+          <option>Consulta general</option>
+          <option>Soporte técnico</option>
+          <option>Ventas</option>
+          <option>Facturación</option>
+          <option>Otro</option>
+        </select>
+        <p class="error-msg">Selecciona un asunto.</p>
+      </div>
+
+      <div class="field" id="f-message">
+        <label for="message">Mensaje <span class="req">*</span></label>
+        <textarea id="message" name="message" maxlength="1000" placeholder="Escribe tu mensaje aquí…"></textarea>
+        <div class="char-count"><span id="count">0</span>/1000</div>
+        <p class="error-msg">El mensaje debe tener al menos 10 caracteres.</p>
+      </div>
+
+      <button type="submit" id="submitBtn">Enviar mensaje</button>
+    </form>
+  </div>
+
+<script>
+(function () {
+  var form = document.getElementById('contactForm');
+  var alertBox = document.getElementById('alert');
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('message');
+  var count = document.getElementById('count');
+
+  msg.addEventListener('input', function () { count.textContent = msg.value.length; });
+
+  function setInvalid(id, bad) {
+    document.getElementById(id).classList.toggle('invalid', bad);
+    return !bad;
+  }
+
+  function validate() {
+    var ok = true;
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var subject = document.getElementById('subject').value;
+    var text = msg.value.trim();
+
+    ok = setInvalid('f-name', name.length < 2) && ok;
+    ok = setInvalid('f-email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) && ok;
+    ok = setInvalid('f-phone', phone !== '' && !/^[+\d][\d\s().-]{5,}$/.test(phone)) && ok;
+    ok = setInvalid('f-subject', subject === '') && ok;
+    ok = setInvalid('f-message', text.length < 10) && ok;
+    return ok;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    alertBox.className = 'alert';
+    alertBox.textContent = '';
+
+    if (!validate()) {
+      alertBox.className = 'alert';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    // Simulación de envío. Reemplaza este bloque por tu backend real:
+    // fetch('/api/contact', { method: 'POST', headers: {'Content-Type':'application/json'},
+    //   body: JSON.stringify(Object.fromEntries(new FormData(form))) })
+    setTimeout(function () {
+      btn.disabled = false;
+      btn.textContent = 'Enviar mensaje';
+      alertBox.className = 'alert success';
+      alertBox.textContent = '✓ ¡Mensaje enviado con éxito! Te responderemos pronto.';
+      form.reset();
+      count.textContent = '0';
+    }, 1200);
+  });
+
+  // Revalidar en vivo al corregir un campo marcado como inválido
+  form.querySelectorAll('input, textarea, select').forEach(function (el) {
+    el.addEventListener('input', function () {
+      if (el.closest('.field').classList.contains('invalid')) validate();
+    });
+  });
+})();
+</script>
+</body>
+</html>
